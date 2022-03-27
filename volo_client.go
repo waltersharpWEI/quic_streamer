@@ -29,38 +29,6 @@ func main() {
 	}
 }
 
-// Start a server that echos all data on the first stream opened by the client
-func echoServer() error {
-	listener, err := quic.ListenAddr(addr, generateTLSConfig(), nil)
-	if err != nil {
-		return err
-	}
-	sess, err := listener.Accept(context.Background())
-	if err != nil {
-		return err
-	}
-	stream, err := sess.AcceptStream(context.Background())
-	if err != nil {
-		panic(err)
-	}
-	dirPath := "objs"
-        PthSep := string(os.PathSeparator)
-        filepath := dirPath + PthSep + string(message)
-	file, err := os.Open(filepath)
-	if err != nil {
-	    panic(err)
-	}
-	n, err := io.Copy(stream, file)
-	if err != nil {
-	    fmt.Println("1")
-	    panic(err)
-        }
-	fmt.Println(n)
-	for {
-	}
-	return err
-}
-
 func clientMain() error {
 	tlsConf := &tls.Config{
 		InsecureSkipVerify: true,
@@ -97,14 +65,6 @@ func clientMain() error {
 	fmt.Println("Received:"+string(n))
         fmt.Printf("Finished saving...")
 	return nil
-}
-
-// A wrapper for io.Writer that also logs the message.
-type loggingWriter struct{ io.Writer }
-
-func (w loggingWriter) Write(b []byte) (int,error) {
-	fmt.Printf("Server: Got '%s'\n", string(b))
-        return w.Writer.Write(b)
 }
 
 // Setup a bare-bones TLS config for the server
